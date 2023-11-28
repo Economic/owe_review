@@ -57,24 +57,34 @@ make_histogram <- function(data) {
   )
   
   binned_data %>% 
+    mutate(group = factor(group, levels = c(
+      "Large negative",
+      "Medium negative",
+      "Small negative",
+      "Positive"
+    ))) %>% 
     ggplot(aes(y = bin, x = n, fill = group)) +
     geom_col(orientation = "y") + 
     geom_segment(
-      aes(x = 0, xend = 22, y = median_owe, yend = median_owe),
+      aes(x = 0, xend = 25.3, y = median_owe, yend = median_owe),
       lineend = "round", linetype = "dashed"
     ) +
     annotate(
       "text", 
-      x = 22.5, 
+      x = 26, 
       y = median_owe, 
       label = median_owe_label,
       #color = "grey40",
       hjust = 0,
       size = 3.1
     ) + 
-    expand_limits(x = 30) +
     scale_y_continuous(breaks = y_axis_breaks, labels = y_axis_labels) +
-    scale_x_continuous(breaks = seq(0, 20, 5), minor_breaks = seq(0, 15, 5) + 2.5) +
+    scale_x_continuous(
+      breaks = seq(0, 25, 5), 
+      minor_breaks = seq(0, 20, 5) + 2.5,
+      limits = c(0, 37),
+      expand = expansion(mult = c(0, 0), add = c(0.5, 0))
+    ) +
     scale_fill_manual(
       labels = legend_labels,
       values = colors
@@ -83,13 +93,26 @@ make_histogram <- function(data) {
       x = "Number of studies",
       y = NULL
     ) +
-    hrbrthemes::theme_ipsum_rc() +
+    #hrbrthemes::theme_ipsum_rc() +
+    theme_minimal() +
     theme(
       panel.grid.major.y = element_blank(),
       panel.grid.minor.y = element_blank(),
       legend.title=element_blank(),
       legend.position = c(0.85, 0.8),
-      axis.title.x = element_text(hjust = 0.6),
-      plot.margin = margin(0,0,0,0)
+      axis.title.x = element_text(
+        size = 10, 
+        hjust = 0.64),
+      plot.margin = margin(0,0,0,0),
+      text = element_text(size=13, family="Roboto Condensed", color = "grey30")
     )
+}
+
+save_plot <- function(p, file, w = NULL, h = NULL) {
+  if (is.null(w)) w <- 9
+  if (is.null(h)) h <- 6
+  
+  ggsave(file, p, device = cairo_pdf, width = w, height = h, units = "in")
+  
+  file
 }
