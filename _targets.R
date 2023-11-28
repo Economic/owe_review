@@ -15,7 +15,7 @@ lapply(list.files("R", full.names = TRUE), source)
 tar_plan(
   owe_data = grab_owe_data(owe_database, download_date),
   histogram = make_histogram(owe_data),
-  tar_file(histogram_file, save_plot(histogram, "histogram_overall.pdf"))
+  tar_file(histogram_file, save_plot(histogram, "docs/histogram_overall.pdf"))
 )
 
 
