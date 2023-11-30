@@ -1,8 +1,3 @@
-grab_owe_data <- function(csv, download_date) {
-  read_csv(csv) %>% 
-    mutate(download_date = download_date) 
-}
-
 make_histogram <- function(data) {
   binned_data <- data %>% 
     mutate(bin = case_when(
@@ -106,6 +101,32 @@ make_histogram <- function(data) {
       plot.margin = margin(0,0,0,0),
       text = element_text(size=13, family="Roboto Condensed", color = "grey30")
     )
+}
+
+
+make_time_plot <- function(data) {
+  binned_data <- data %>% 
+    mutate(time = case_when(
+      year >= 1992 & year <= 2000 ~ "1992-2000",
+      year >= 2001 & year <= 2010 ~ "2001-2010",
+      year >= 2011 & year <= 2020 ~ "2011-2020",
+      year >= 2021 ~ "2021-2024"
+    )) 
+  
+  published <- binned_data %>%
+    filter(published == 1) %>% 
+    summarize(study_count = n(), owe_median = median(owe_b), .by = time) %>% 
+    mutate(group = "published")
+  
+  binned_data %>% 
+    summarize(study_count = n(), owe_median = median(owe_b), .by = time) %>% 
+    mutate(group = "all studies") %>% 
+    bind_rows(published) %>% 
+    arrange(group, time) %>% 
+    ggplot(aes(x = study_count, y = owe_median, color = group, label = time)) +
+    geom_path() + 
+    geom_point() + 
+    geom_text()
 }
 
 save_plot <- function(p, file, w = NULL, h = NULL) {
