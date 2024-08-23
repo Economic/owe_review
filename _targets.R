@@ -2,11 +2,7 @@
 source("packages.R")
 
 ## Globals
-citation_authors <- "Arindrajit Dube and Ben Zipperer"
-citation_year <- 2023
-citation_title <- "Minimum wage own-wage elasticity database"
-citation_url <- "https://economic.github.io/owe"
-download_date <- "30 November 2023"
+download_date <- "23 August 2024"
 owe_database <- "https://economic.github.io/owe/mw_owe_database.csv"
 
 ## Functions
@@ -14,10 +10,78 @@ lapply(list.files("R", full.names = TRUE), source)
 
 tar_plan(
   owe_data = grab_owe_data(owe_database, download_date),
-  histogram = make_histogram(owe_data),
-  tar_file(histogram_file, save_plot(histogram, "docs/histogram_overall.pdf")),
-  tar_file(summary_table, make_summary_table(owe_data, "docs/summary_table.tex")),
-  tar_file(reference_list, make_reference_list(owe_data, "docs/study_list.tex"))
+
+  histogram_inputs = define_histograms(),
+  
+  # all histograms, as list
+  all_histograms = make_histograms(owe_data, histogram_inputs),
+  
+  # overall histogram pdf
+  tar_file(histogram_overall_file, save_plot(
+    all_histograms$overall, "docs/histogram_overall.pdf", w = 7, h = 4.67
+  )),
+  
+  # broad vs narrow histograms pdf
+  tar_file(histogram_broad_narrow_file, pair_histograms_pdf(
+    all_histograms$broad, 
+    all_histograms$narrow,
+    "Overall/broad group low wage workers",
+    "Narrow group of low wage workers",
+    "docs/histogram_broad_narrow.pdf"
+  )),
+  
+  # teens vs restaurants/retail histograms pdf
+  tar_file(histogram_teens_rr_file, pair_histograms_pdf(
+    all_histograms$teens, 
+    all_histograms$rr,
+    "Teenagers",
+    "Restaurants or retail",
+    "docs/histogram_teens_rr.pdf"
+  )),
+
+  # summary table
+  tar_file(
+    summary_table, 
+    make_summary_table(owe_data, "docs/summary_table.tex")
+  ),
+  
+  # list of references
+  tar_file(
+    reference_list, 
+    make_reference_list(owe_data, "docs/study_list.tex")
+  ),
+  
+  # range plot of all studies
+  range_plot = make_range_plot(owe_data),
+  tar_file(
+    range_plot_file, 
+    save_plot(range_plot, "docs/range_plot.pdf", h = 7.5, w = 7)
+  ),
+  
+  # rolling median OWE
+  rolling_owe_plot = make_rolling_plot(owe_data),
+  tar_file(
+    rolling_owe_file, 
+    save_plot(rolling_owe_plot, "docs/rolling_owe.pdf", w = 7, h = 4.67)
+  ),
+  
+  # OWE reported plot
+  owe_reported_plot = make_owe_reported_plot(owe_data),
+  tar_file(
+    owe_reported_file, 
+    save_plot(owe_reported_plot, "docs/owe_reported.pdf", w = 7, h = 4.67)
+  ),
+  
+  # hypothetical elasticities table
+  tar_file(
+    hypohetical_elasticities_table, 
+    make_hypothetical_table("docs/hypothetical_table.tex")
+  ),
+  
+  tar_file(
+    paper_stats_csv, create_paper_stats_csv(
+      owe_data,
+      "docs/paper_stats.csv"
+    )
+  )
 )
-
-

@@ -1,5 +1,57 @@
-make_histogram <- function(data) {
-  binned_data <- data %>% 
+save_plot <- function(p, file, w = NULL, h = NULL) {
+  if (is.null(w)) w <- 9
+  if (is.null(h)) h <- 6
+  
+  ggsave(file, p, device = cairo_pdf, dpi = 600, width = w, height = h, units = "in")
+  
+  file
+}
+
+define_histograms <- function() {
+  tribble(
+    ~name, ~filter_string, ~outcome,
+    "overall", "published == 1", "count",
+    "broad", "published == 1 & overall == 1", "percent",
+    "narrow", "published == 1 & overall != 1", "percent",
+    "rr", "published == 1 & restaurants_retail == 1", "percent",
+    "teens", "published == 1 & teens == 1", "percent"
+  ) 
+}
+
+make_histograms <- function(data, inputs) {
+  parameters <- inputs %>% 
+    mutate(data = list(data)) %>% 
+    select(data, filter_string, outcome)
+    
+  list_names <- inputs %>% 
+    pull(name)
+  
+  output <- parameters %>% 
+    pmap(make_histogram)
+  
+  names(output) <- list_names
+  
+  output
+}
+
+pair_histograms_pdf <- function(hist_1, hist_2, title_1, title_2, file) {
+  plot <- (hist_1 + ggtitle(title_1) + theme(plot.margin = margin(b = 10))) /
+  (hist_2 + ggtitle(title_2) + theme(plot.margin = margin(t = 10)))
+    
+  save_plot(plot, file, h = 8.0, w = 7)
+}
+
+colors <- c(
+  "Large negative" = "#440154FF",
+  "Medium negative" = "#3B528BFF",
+  "Small negative" = "#21908CFF",
+  "Positive" = "#5DC863FF"
+)
+
+make_histogram <- function(data, filter_string = NULL, outcome = "percent") {
+  
+  data <- data %>% 
+    mutate(all = 1) %>% 
     mutate(bin = case_when(
       owe_b < -1.2 ~ -1.4,
       owe_b >= -1.2 & owe_b < -0.8 ~ -1.0,
@@ -9,16 +61,25 @@ make_histogram <- function(data) {
       owe_b >=  0.4 & owe_b <  0.8 ~  0.6,
       owe_b >=  0.8 & owe_b <  1.2 ~  1.0,
       owe_b >=  1.2 ~ 1.4
-    )) %>% 
-    count(group = owe_magnitude, bin) %>% 
-    mutate(bin = bin * -1) 
+    ))
   
-  colors <- c(
-    "Large negative" = "#440154FF",
-    "Medium negative" = "#3B528BFF",
-    "Small negative" = "#21908CFF",
-    "Positive" = "#5DC863FF"
-  )
+  if (is.null(filter_string)) {
+    filter_string <- "all == 1"
+  }
+  
+  filtered_data <- data %>% 
+    filter(eval(rlang::parse_expr(filter_string)))
+  
+  binned_template <- data %>% 
+    count(group = owe_magnitude, bin) %>% 
+    mutate(bin = bin * -1) %>% 
+    select(group, bin)
+  
+  binned_data <- filtered_data %>% 
+    count(group = owe_magnitude, bin) %>% 
+    mutate(bin = bin * -1) %>% 
+    full_join(binned_template, by = join_by(group, bin)) %>% 
+    mutate(n = if_else(is.na(n), 0, n))
   
   legend_labels <- binned_data %>% 
     summarize(n = sum(n), .by = group) %>% 
@@ -30,14 +91,15 @@ make_histogram <- function(data) {
     select(group, legend_label) %>% 
     deframe()
   
-  median_owe <- data %>% 
+  median_owe <- filtered_data %>% 
     summarize(median(owe_b) * -1) %>% 
     pull()
   
   median_owe_label <- paste(
     "Median OWE =", 
-    scales::label_number(accuracy = 0.01)(median_owe * -1)
-  )
+    scales::label_number(accuracy = 0.001)(median_owe * -1)
+  ) %>% 
+    str_replace("-", "\u2212")
   
   y_axis_breaks <- seq(-14, 14, 4) / 10 * -1
   y_axis_labels <- c(
@@ -51,6 +113,48 @@ make_histogram <- function(data) {
     "More positive than 1.2"
   )
   
+  if (outcome == "percent") {
+    binned_data <- binned_data %>% 
+      mutate(n = n / sum(n))
+    
+    max_value <- 0.44
+    
+    x_scale <- scale_x_continuous(
+      labels = scales::label_percent(accuracy = 1),
+      breaks = c(seq(0, 0.4, 0.1)), 
+      minor_breaks = seq(0, 0.4, 0.1) + 0.05,
+      expand = expansion(mult = c(0, 0), add = c(0.01, 0.0)),
+      limits = c(0, 0.8)
+    )
+    
+    x_axis_title <- "Share of studies"
+    
+    median_owe_seg_xend <- max_value * 1.10
+    median_owe_label_x <- max_value * 1.15
+    
+  }
+  
+  if (outcome == "count") {
+    max_value <- binned_data %>% 
+      summarize(max(n)) %>% 
+      pull()
+    
+    max_value <- 20.5
+    
+    x_scale <- scale_x_continuous(
+      breaks = seq(0, 20, 5), 
+      minor_breaks = seq(0, 15, 5) + 2.5,
+      limits = c(0, 37),
+      expand = expansion(mult = c(0, 0), add = c(0.5, 0))
+    )
+    
+    x_axis_title <- "Number of studies"
+    
+    median_owe_seg_xend <- max_value * 1.10
+    median_owe_label_x <- max_value * 1.15
+    
+  }
+  
   binned_data %>% 
     mutate(group = factor(group, levels = c(
       "Large negative",
@@ -61,79 +165,213 @@ make_histogram <- function(data) {
     ggplot(aes(y = bin, x = n, fill = group)) +
     geom_col(orientation = "y") + 
     geom_segment(
-      aes(x = 0, xend = 25.3, y = median_owe, yend = median_owe),
-      lineend = "round", linetype = "dashed"
+      aes(x = 0, xend = median_owe_seg_xend, y = median_owe, yend = median_owe),
+      color = "grey30",
+      alpha = 0.5,
+      lineend = "round", 
+      linetype = "dashed"
     ) +
     annotate(
       "text", 
-      x = 26, 
+      x = median_owe_label_x, 
       y = median_owe, 
       label = median_owe_label,
-      #color = "grey40",
       hjust = 0,
-      size = 3.1
+      size = 3.5, 
+      color = "grey30",
+      family="Roboto Condensed"
     ) + 
     scale_y_continuous(breaks = y_axis_breaks, labels = y_axis_labels) +
-    scale_x_continuous(
-      breaks = seq(0, 25, 5), 
-      minor_breaks = seq(0, 20, 5) + 2.5,
-      limits = c(0, 37),
-      expand = expansion(mult = c(0, 0), add = c(0.5, 0))
-    ) +
+    x_scale +
     scale_fill_manual(
       labels = legend_labels,
       values = colors
     ) +
     labs(
-      x = "Number of studies",
+      x = x_axis_title,
       y = NULL
     ) +
-    #hrbrthemes::theme_ipsum_rc() +
     theme_minimal() +
     theme(
       panel.grid.major.y = element_blank(),
       panel.grid.minor.y = element_blank(),
       legend.title=element_blank(),
-      legend.position = c(0.85, 0.8),
+      legend.position = c(0.78, 0.85),
       axis.title.x = element_text(
         size = 10, 
         hjust = 0.64),
       plot.margin = margin(0,0,0,0),
-      text = element_text(size=13, family="Roboto Condensed", color = "grey30")
+      text = element_text(size=13, family="Roboto Condensed", color = "grey30"),
+      plot.title = element_text(
+        
+        margin = margin(b = 10)
+      )
+    )
+}
+
+make_range_plot <- function(data) {
+  truncate <- function(x) {
+    case_when(x > 3 ~ 3, x < -3 ~ -3, TRUE ~ x)
+  }
+  
+  data <- data %>% 
+    mutate(group = factor(owe_magnitude, levels = c(
+      "Large negative",
+      "Medium negative",
+      "Small negative",
+      "Positive"
+    ))) %>% 
+    mutate(across(owe_ub|owe_lb, truncate))
+  
+  legend_labels <- data %>% 
+    count(group) %>% 
+    mutate(
+      n_total = sum(n),
+      n_share = scales::label_percent(accuracy = 1)(n / n_total),
+      legend_label = paste0(group, ": ", n, " studies (", n_share, ")")
+    ) %>% 
+    select(group, legend_label) %>% 
+    deframe()
+  
+  data %>% 
+    mutate(study = if_else(overall == 1, glue("<b>{study}</b>"), study)) %>% 
+    ggplot(aes(y = reorder(study, owe_b, desc), color = group)) +
+    geom_point(aes(x = owe_b), size = 2) +
+    geom_segment(
+      aes(x = owe_lb, xend = owe_ub, yend = study), 
+      lineend = "round",
+      linewidth = 1
+    ) + 
+    scale_color_manual(
+      values = colors,
+      labels = legend_labels
+    ) +
+    scale_x_continuous(
+      breaks = seq(-3, 3, 0.5),
+      minor_breaks = NULL,
+      limits = c(-3, 3),
+      expand = expansion(mult = c(0, 0), add = c(0.05, 0.40))
+    ) + 
+    theme_minimal() +
+    theme(
+      panel.grid.major.y = element_blank(),
+      panel.grid.minor.y = element_blank(),
+      legend.title=element_blank(),
+      legend.position = c(0.79, 0.88),
+      legend.spacing.y = unit(0, 'cm'),
+      axis.title.x = element_blank(),
+      axis.title.y = element_blank(),
+      axis.text.y = element_markdown(vjust = 0.67),
+      plot.margin = margin(0,0,0,0),
+      text = element_text(size=10, family="Roboto Condensed", color = "grey30")
+    ) +
+    guides(color = guide_legend(byrow = TRUE))
+}
+
+
+rolling_stats <- function(data, central_year) {
+  begin_year <- central_year - 5
+  end_year <- central_year + 4
+  
+  filtered_data <- data %>% 
+    filter(year >= begin_year, year <= end_year) 
+  
+  obs_count <- nrow(filtered_data)
+  
+  filtered_data %>% 
+    summarize(
+      mean = mean(owe_b), 
+      median = median(owe_b),
+      p25 = quantile(owe_b, 0.25),
+      p75 = quantile(owe_b, 0.75),
+      mean_owe_reported = mean(owe_reported)
+    ) %>% 
+    mutate(year = central_year) %>% 
+    pivot_longer(-year) %>% 
+    mutate(study_count = obs_count, begin_year = begin_year, end_year = end_year)
+}
+
+make_rolling_plot <- function(owe_data) {
+  
+  color_1 <- c("#440154FF")
+  color_2 <- c("#21908CFF")
+  color_3 <- c("#3B528BFF")
+  
+  data <- owe_data %>% 
+    filter(published == 1)
+  
+  map(1996:2020, ~ rolling_stats(data, .x)) %>% 
+    list_rbind() %>% 
+    filter(name %in% c("median", "mean"), year >= 2005) %>% 
+    ggplot(aes(x = year, y = value, color = name)) + 
+    geom_point() +
+    geom_line() + 
+    annotate(
+      "text",
+      y = 0.04,
+      x = 2019.7,
+      label = "Median OWE",
+      hjust = 1,
+      size = 3.5, 
+      color = color_2,
+      family = "Roboto Condensed"
+    ) +
+    annotate(
+      "text",
+      y = -0.17,
+      x = 2019.7,
+      label = "Mean OWE",
+      hjust = 1,
+      size = 3.5, 
+      color = color_1,
+      family = "Roboto Condensed"
+    ) +
+    scale_y_continuous(limits = c(-0.5, 0.1)) +
+    scale_color_manual(values = c(color_1, color_2)) + 
+    theme_minimal(base_family = "Roboto Condensed") +
+    theme(
+      axis.title.x = element_blank(),
+      axis.title.y = element_blank(),
+      text = element_text(size=13, color = "grey30"),
+      legend.position = "none"
+    )
+}
+
+make_owe_reported_plot <- function(owe_data) {
+  color_1 <- c("#440154FF")
+  color_2 <- c("#21908CFF")
+  color_3 <- c("#3B528BFF")
+  
+  owe_data %>% 
+    filter(published == 1) %>% 
+    mutate(decade = case_when(
+      year >= 1990 & year < 2000 ~ "1992 - 1999",
+      year >= 2000 & year < 2010 ~ "2000 - 2009",
+      year >= 2010 & year < 2020 ~ "2010 - 2019",
+      year >= 2020 ~ "2020 - 2024"
+    )) %>% 
+    summarize(`Employment and wage\nelasticities only` = sum(1 - owe_reported), `OWE reported\nby authors` = sum(owe_reported), .by = decade) %>% 
+    mutate(across(everything(), ~ replace_na(.x, 0))) %>% 
+    pivot_longer(-decade) %>% 
+    ggplot(aes(x = decade, fill = name, y = value)) + 
+    geom_bar(stat = "identity") +
+    scale_fill_manual(values = c(color_2, color_3)) + 
+    scale_y_continuous(breaks = seq(0, 24, 4), minor_breaks = seq(0, 24, 2)) + 
+    theme_minimal(base_family = "Roboto Condensed") +
+    theme(
+      axis.title.x = element_blank(),
+      axis.title.y = element_blank(),
+      text = element_text(size=13, color = "grey30"),
+      #legend.position = "none",
+      legend.title = element_blank(),
+      panel.grid.major.x = element_blank(),
+      legend.key.spacing.y  = unit(0.3, "cm"),
+      legend.key.width = unit(0.7, "cm")
     )
 }
 
 
-make_time_plot <- function(data) {
-  binned_data <- data %>% 
-    mutate(time = case_when(
-      year >= 1992 & year <= 2000 ~ "1992-2000",
-      year >= 2001 & year <= 2010 ~ "2001-2010",
-      year >= 2011 & year <= 2020 ~ "2011-2020",
-      year >= 2021 ~ "2021-2024"
-    )) 
-  
-  published <- binned_data %>%
-    filter(published == 1) %>% 
-    summarize(study_count = n(), owe_median = median(owe_b), .by = time) %>% 
-    mutate(group = "published")
-  
-  binned_data %>% 
-    summarize(study_count = n(), owe_median = median(owe_b), .by = time) %>% 
-    mutate(group = "all studies") %>% 
-    bind_rows(published) %>% 
-    arrange(group, time) %>% 
-    ggplot(aes(x = study_count, y = owe_median, color = group, label = time)) +
-    geom_path() + 
-    geom_point() + 
-    geom_text()
-}
 
-save_plot <- function(p, file, w = NULL, h = NULL) {
-  if (is.null(w)) w <- 9
-  if (is.null(h)) h <- 6
-  
-  ggsave(file, p, device = cairo_pdf, width = w, height = h, units = "in")
-  
-  file
-}
+
+
+

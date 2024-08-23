@@ -11,4 +11,8 @@ options(usethis.quiet = TRUE)
 suppressPackageStartupMessages({
   library(tidyverse)
   library(kableExtra)
+  library(patchwork)
+  library(ggtext)
+  library(glue)
+  library(scales)
 })
