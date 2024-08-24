@@ -13,7 +13,7 @@ create_paper_stats_csv = function(data, file_name) {
     mutate(name = "Mean OWE (published studies)")
   
   median_broad = data |> 
-    filter(published == 1) |> 
+    filter(published == 1, overall == 1) |> 
     summarize(value = median(owe_b)) |> 
     mutate(value = label_number(accuracy = 0.01)(value)) |> 
     mutate(name = "Median OWE, broad group")
@@ -33,6 +33,7 @@ create_paper_stats_csv = function(data, file_name) {
     filter(published == 1) |> 
     mutate(more_positive = owe_b >= -0.4) |> 
     summarize(value = mean(more_positive)) |> 
+    mutate(value = label_percent(accuracty = 1)(value)) |> 
     mutate(name = "Share of studies with OWE >= -0.4")
   
   number_journals = data |> 
@@ -86,12 +87,23 @@ create_paper_stats_csv = function(data, file_name) {
     mutate(value = as.character(n)) |> 
     mutate(name = "Studies without SE, published")
   
+  published_since_2010 = data |> 
+    filter(published == 1) |> 
+    mutate(since_2010 = year >= 2010) |> 
+    summarize(
+      "Published since 2010, count" = as.character(sum(since_2010)),
+      "Published since 2010, share" = label_percent(accuarcy = 1)(mean(since_2010))
+    ) |> 
+    pivot_longer(everything())
+  
   results = bind_rows(
       median_owe, mean_owe, median_broad,
       count_studies_all, count_studies_published,
+      share_studies_more_pos,
       number_journals, journals_with_at_least_4,
       averaged_estimates_all, averaged_estimates_published,
-      owe_reported_all, owe_reported_published
+      owe_reported_all, owe_reported_published,
+      published_since_2010
     ) |> 
     select(name, value)
   

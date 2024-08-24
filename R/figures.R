@@ -356,7 +356,7 @@ make_owe_reported_plot <- function(owe_data) {
     ggplot(aes(x = decade, fill = name, y = value)) + 
     geom_bar(stat = "identity") +
     scale_fill_manual(values = c(color_2, color_3)) + 
-    scale_y_continuous(breaks = seq(0, 24, 4), minor_breaks = seq(0, 24, 2)) + 
+    scale_y_continuous(breaks = seq(0, 32, 4), minor_breaks = seq(0, 30, 2)) + 
     theme_minimal(base_family = "Roboto Condensed") +
     theme(
       axis.title.x = element_blank(),

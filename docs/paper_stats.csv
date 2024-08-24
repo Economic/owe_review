@@ -1,9 +1,10 @@
 name,value
 Median OWE (published studies),-0.13
 Mean OWE (published studies),-0.23
-"Median OWE, broad group",-0.13
+"Median OWE, broad group",0.01
 "Number of studies, all studies",88
 "Number of studies, published studies",72
+Share of studies with OWE >= -0.4,71%
 Number of journals in repository,30
 Journal with at least 4 studies #1,ILR Review (13)
 Journal with at least 4 studies #2,Journal of Labor Economics (8)
@@ -15,3 +16,5 @@ Journal with at least 4 studies #6,The Review of Economics and Statistics (4)
 "Studies with average of multiple estimates, published",15
 "Studies reporting OWE, all",34
 "Studies reporting OWE, published",29
+"Published since 2010, count",49
+"Published since 2010, share",68%
