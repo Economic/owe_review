@@ -18,3 +18,12 @@ Journal with at least 4 studies #6,The Review of Economics and Statistics (4)
 "Studies reporting OWE, published",29
 "Published since 2010, count",49
 "Published since 2010, share",68%
+"Studies without SE, all",11
+"Studies without SE, published",7
+Median OWE (all studies),-0.14
+Mean OWE (all studies),-0.21
+"Median OWE, United States",-0.11
+"Mean OWE, United States",-0.20
+"Number of studies, narrow groups",50
+"Number of studies, broad groups",22
+"Median OWE, narrow group",-0.16

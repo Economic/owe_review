@@ -97,7 +97,7 @@ make_histogram <- function(data, filter_string = NULL, outcome = "percent") {
   
   median_owe_label <- paste(
     "Median OWE =", 
-    scales::label_number(accuracy = 0.001)(median_owe * -1)
+    scales::label_number(accuracy = 0.01)(median_owe * -1)
   ) %>% 
     str_replace("-", "\u2212")
   

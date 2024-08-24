@@ -1,4 +1,8 @@
 create_paper_stats_csv = function(data, file_name) {
+  median_owe_all = data |> 
+    summarize(value = median(owe_b)) |> 
+    mutate(value = label_number(accuracy = 0.01)(value)) |> 
+    mutate(name = "Median OWE (all studies)")
   
   median_owe = data |> 
     filter(published == 1) |> 
@@ -12,11 +16,34 @@ create_paper_stats_csv = function(data, file_name) {
     mutate(value = label_number(accuracy = 0.01)(value)) |> 
     mutate(name = "Mean OWE (published studies)")
   
+  mean_owe_all = data |> 
+    summarize(value = mean(owe_b)) |> 
+    mutate(value = label_number(accuracy = 0.01)(value)) |> 
+    mutate(name = "Mean OWE (all studies)")
+  
   median_broad = data |> 
     filter(published == 1, overall == 1) |> 
     summarize(value = median(owe_b)) |> 
     mutate(value = label_number(accuracy = 0.01)(value)) |> 
     mutate(name = "Median OWE, broad group")
+  
+  median_narrow = data |> 
+    filter(published == 1, overall != 1) |> 
+    summarize(value = median(owe_b)) |> 
+    mutate(value = label_number(accuracy = 0.01)(value)) |> 
+    mutate(name = "Median OWE, narrow group")
+  
+  median_us = data |> 
+    filter(published == 1, country == "US") |> 
+    summarize(value = median(owe_b)) |> 
+    mutate(value = label_number(accuracy = 0.01)(value)) |> 
+    mutate(name = "Median OWE, United States")
+  
+  mean_us = data |> 
+    filter(published == 1, country == "US") |> 
+    summarize(value = mean(owe_b)) |> 
+    mutate(value = label_number(accuracy = 0.01)(value)) |> 
+    mutate(name = "Mean OWE, United States")
   
   count_studies_all = data |> 
     count() |> 
@@ -96,6 +123,18 @@ create_paper_stats_csv = function(data, file_name) {
     ) |> 
     pivot_longer(everything())
   
+  number_studies_narrow = data |> 
+    filter(published == 1, overall != 1) |> 
+    count() |> 
+    mutate(value = as.character(n)) |> 
+    mutate(name = "Number of studies, narrow groups")
+  
+  number_studies_broad = data |> 
+    filter(published == 1, overall == 1) |> 
+    count() |> 
+    mutate(value = as.character(n)) |> 
+    mutate(name = "Number of studies, broad groups")
+  
   results = bind_rows(
       median_owe, mean_owe, median_broad,
       count_studies_all, count_studies_published,
@@ -103,7 +142,12 @@ create_paper_stats_csv = function(data, file_name) {
       number_journals, journals_with_at_least_4,
       averaged_estimates_all, averaged_estimates_published,
       owe_reported_all, owe_reported_published,
-      published_since_2010
+      published_since_2010,
+      no_owe_se_all, no_owe_se_published,
+      median_owe_all, mean_owe_all,
+      median_us, mean_us,
+      number_studies_narrow, number_studies_broad,
+      median_narrow
     ) |> 
     select(name, value)
   
