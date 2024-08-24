@@ -50,10 +50,48 @@ create_paper_stats_csv = function(data, file_name) {
     mutate(name = paste0("Journal with at least 4 studies #", row_number())) |> 
     mutate(value = paste0(journal, " (", n, ")"))
   
+  averaged_estimates_all = data |> 
+    filter(averaged == 1) |> 
+    count() |> 
+    mutate(value = as.character(n)) |> 
+    mutate(name = "Studies with average of multiple estimates, all")
+  
+  averaged_estimates_published = data |> 
+    filter(published == 1, averaged == 1) |> 
+    count() |> 
+    mutate(value = as.character(n)) |> 
+    mutate(name = "Studies with average of multiple estimates, published")
+  
+  owe_reported_all = data |> 
+    filter(owe_reported == 1) |> 
+    count() |> 
+    mutate(value = as.character(n)) |> 
+    mutate(name = "Studies reporting OWE, all")
+  
+  owe_reported_published = data |> 
+    filter(published == 1, owe_reported == 1) |> 
+    count() |> 
+    mutate(value = as.character(n)) |> 
+    mutate(name = "Studies reporting OWE, published")
+  
+  no_owe_se_all = data |> 
+    filter(is.na(owe_se)) |> 
+    count() |> 
+    mutate(value = as.character(n)) |> 
+    mutate(name = "Studies without SE, all")
+  
+  no_owe_se_published = data |> 
+    filter(published == 1, is.na(owe_se)) |> 
+    count() |> 
+    mutate(value = as.character(n)) |> 
+    mutate(name = "Studies without SE, published")
+  
   results = bind_rows(
       median_owe, mean_owe, median_broad,
       count_studies_all, count_studies_published,
-      number_journals, journals_with_at_least_4
+      number_journals, journals_with_at_least_4,
+      averaged_estimates_all, averaged_estimates_published,
+      owe_reported_all, owe_reported_published
     ) |> 
     select(name, value)
   
