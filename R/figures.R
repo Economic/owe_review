@@ -370,6 +370,40 @@ make_owe_reported_plot <- function(owe_data) {
     )
 }
 
+make_owe_decade_plot <- function(owe_data) {
+  color_1 <- c("#440154FF")
+  color_2 <- c("#21908CFF")
+  color_3 <- c("#3B528BFF")
+  
+  # owe_data %>% 
+  #   filter(published == 1) %>% 
+  #   mutate(decade = case_when(
+  #     year >= 1990 & year < 2000 ~ "1992 - 1999",
+  #     year >= 2000 & year < 2010 ~ "2000 - 2009",
+  #     year >= 2010 & year < 2020 ~ "2010 - 2019",
+  #     year >= 2020 ~ "2020 - 2024"
+  #   )) %>% 
+  #   summarize(value = median(owe_b), count = n(), .by = decade) %>% 
+  #   ggplot(aes(x = decade, y = value)) + 
+  #   geom_bar(stat = "identity", width = 0.67, fill = color_3) +
+  #   theme_minimal(base_family = "Roboto Condensed") +
+  #   theme(
+  #     axis.title.x = element_blank(),
+  #     axis.title.y = element_blank(),
+  #     text = element_text(size=13, color = "grey30"),
+  #     legend.title = element_blank(),
+  #     panel.grid.major.x = element_blank(),
+  #     legend.key.spacing.y  = unit(0.3, "cm"),
+  #     legend.key.width = unit(0.7, "cm")
+  #   )
+  
+  owe_data %>% 
+    filter(published == 1) %>% 
+    ggplot(aes(x = year, y = owe_b)) + 
+    geom_point() + 
+    geom_smooth()
+}
+
 
 
 

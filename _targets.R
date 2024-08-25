@@ -3,7 +3,7 @@ source("packages.R")
 
 ## Globals
 download_date <- "23 August 2024"
-owe_database <- "https://economic.github.io/owe/mw_owe_database.csv"
+owe_database <- "https://economic.github.io/owe/mw_owe_repository.csv"
 
 ## Functions
 lapply(list.files("R", full.names = TRUE), source)
@@ -70,6 +70,13 @@ tar_plan(
   tar_file(
     owe_reported_file, 
     save_plot(owe_reported_plot, "docs/owe_reported.pdf", w = 7, h = 4.67)
+  ),
+  
+  # Median OWE by decade bar plot
+  owe_decade_plot = make_owe_decade_plot(owe_data),
+  tar_file(
+    owe_decade_file, 
+    save_plot(owe_decade_plot, "docs/owe_decade.pdf", w = 7, h = 4.67)
   ),
   
   # hypothetical elasticities table
