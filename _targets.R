@@ -1,17 +1,14 @@
 ## Load your packages, e.g. library(targets).
 source("packages.R")
 
-## Globals
-download_date <- "23 August 2024"
-owe_database <- "https://economic.github.io/owe/mw_owe_repository.csv"
-
 ## Functions
 lapply(list.files("R", full.names = TRUE), source)
 
 tar_plan(
   
   # owe data from web
-  owe_data = grab_owe_data(owe_database, download_date),
+  tar_file(owe_data_csv, "mw_owe_repository.csv"),
+  owe_data = read_csv(owe_data_csv, show_col_types = FALSE),
   
   # ns papers with dz study id
   tar_file(ns_dz_matches_csv, "ns_dz_match.csv"),
