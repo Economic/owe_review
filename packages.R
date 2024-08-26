@@ -13,6 +13,7 @@ suppressPackageStartupMessages({
   library(kableExtra)
   library(patchwork)
   library(ggtext)
-  library(glue)
   library(scales)
+  library(broom)
+  library(boot)
 })

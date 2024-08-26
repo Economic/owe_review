@@ -4,6 +4,9 @@ source("packages.R")
 ## Functions
 lapply(list.files("R", full.names = TRUE), source)
 
+# for reproducibility of the bootstrap
+tar_option_set(seed = 2533725)
+
 tar_plan(
   
   # owe data from web
@@ -12,6 +15,9 @@ tar_plan(
   
   # ns papers with dz study id
   tar_file(ns_dz_matches_csv, "ns_dz_match.csv"),
+  
+  # bootstrapped median and mean by decade
+  boot_central = bootstrap_by_decade(owe_data),
   
   # histogram names
   histogram_inputs = define_histograms(),
