@@ -61,13 +61,6 @@ tar_plan(
     save_plot(range_plot, "docs/range_plot.pdf", h = 7.5, w = 7)
   ),
   
-  # rolling median OWE
-  rolling_owe_plot = make_rolling_plot(owe_data),
-  tar_file(
-    rolling_owe_file, 
-    save_plot(rolling_owe_plot, "docs/rolling_owe.pdf", w = 7, h = 4.67)
-  ),
-  
   # OWE reported plot
   owe_reported_plot = make_owe_reported_plot(owe_data),
   tar_file(

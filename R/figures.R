@@ -201,7 +201,7 @@ make_histogram <- function(data, filter_string = NULL, outcome = "percent") {
         size = 10, 
         hjust = 0.64),
       plot.margin = margin(0,0,0,0),
-      text = element_text(size=13, family="Roboto Condensed", color = "grey30"),
+      text = element_text(size=12, family="Roboto Condensed", color = "grey30"),
       plot.title = element_text(
         
         margin = margin(b = 10)
@@ -234,7 +234,6 @@ make_range_plot <- function(data) {
     deframe()
   
   data %>% 
-    mutate(study = if_else(overall == 1, glue("<b>{study}</b>"), study)) %>% 
     ggplot(aes(y = reorder(study, owe_b, desc), color = group)) +
     geom_point(aes(x = owe_b), size = 2) +
     geom_segment(
@@ -257,85 +256,17 @@ make_range_plot <- function(data) {
       panel.grid.major.y = element_blank(),
       panel.grid.minor.y = element_blank(),
       legend.title=element_blank(),
-      legend.position = c(0.79, 0.88),
+      legend.position = c(0.79, 0.83),
       legend.spacing.y = unit(0, 'cm'),
       axis.title.x = element_blank(),
       axis.title.y = element_blank(),
       axis.text.y = element_markdown(vjust = 0.67),
       plot.margin = margin(0,0,0,0),
-      text = element_text(size=10, family="Roboto Condensed", color = "grey30")
+      text = element_text(size=9, family="Roboto Condensed", color = "grey30")
     ) +
     guides(color = guide_legend(byrow = TRUE))
 }
 
-
-rolling_stats <- function(data, central_year) {
-  begin_year <- central_year - 9
-  end_year <- central_year
-  
-  filtered_data <- data %>% 
-    filter(year >= begin_year, year <= end_year) 
-  
-  obs_count <- nrow(filtered_data)
-  
-  filtered_data %>% 
-    summarize(
-      mean = mean(owe_b), 
-      median = median(owe_b),
-      p25 = quantile(owe_b, 0.25),
-      p75 = quantile(owe_b, 0.75),
-      mean_owe_reported = mean(owe_reported)
-    ) %>% 
-    mutate(year = central_year) %>% 
-    pivot_longer(-year) %>% 
-    mutate(study_count = obs_count, begin_year = begin_year, end_year = end_year)
-}
-
-make_rolling_plot <- function(owe_data) {
-  
-  color_1 <- c("#440154FF")
-  color_2 <- c("#21908CFF")
-
-  data <- owe_data %>% 
-    filter(published == 1)
-
-
-  map(2001:2024, ~ rolling_stats(data, .x)) %>%
-    list_rbind() %>%
-    filter(name %in% c("median", "mean")) %>%
-    ggplot(aes(x = year, y = value, color = name)) +
-    geom_point() +
-    geom_line() +
-    annotate(
-      "text",
-      y = 0.04,
-      x = 2019.7,
-      label = "Median OWE",
-      hjust = 1,
-      size = 3.5,
-      color = color_2,
-      family = "Roboto Condensed"
-    ) +
-    annotate(
-      "text",
-      y = -0.17,
-      x = 2019.7,
-      label = "Mean OWE",
-      hjust = 1,
-      size = 3.5,
-      color = color_1,
-      family = "Roboto Condensed"
-    ) +
-    #scale_y_continuous(limits = c(-0.6, 0.3)) +
-    scale_color_manual(values = c(color_1, color_2)) +
-    theme_minimal(base_family = "Roboto Condensed") +
-    theme(
-      axis.title.x = element_blank(),
-      axis.title.y = element_blank(),
-      text = element_text(size=13, color = "grey30"),
-      legend.position = "none"
-    )
-}
 
 make_owe_reported_plot <- function(owe_data) {
   color_1 <- c("#440154FF")
@@ -361,7 +292,7 @@ make_owe_reported_plot <- function(owe_data) {
     theme(
       axis.title.x = element_blank(),
       axis.title.y = element_blank(),
-      text = element_text(size=13, color = "grey30"),
+      text = element_text(size=12, color = "grey30"),
       #legend.position = "none",
       legend.title = element_blank(),
       panel.grid.major.x = element_blank(),
@@ -375,37 +306,53 @@ make_owe_decade_plot <- function(owe_data) {
   color_2 <- c("#21908CFF")
   color_3 <- c("#3B528BFF")
   
-  owe_data %>%
-    filter(published == 1) %>%
+  colors = c("Mean" = color_2, "Median" = color_3, "owe_b" = color_1)
+  alpha_values = c("Mean" = 1, "Median" = 1, "owe_b" = 0.4)
+  point_sizes = c("Mean" = 3.2, "Median" = 3.2, "owe_b" = 1.8)
+  point_shapes = c("Mean" = 17, "Median" = 15, "owe_b" = 1)
+  
+  data = owe_data %>%
+    filter(published == 1) |> 
     mutate(decade = case_when(
       year >= 1990 & year < 2000 ~ "1992 - 1999",
       year >= 2000 & year < 2010 ~ "2000 - 2009",
       year >= 2010 & year < 2020 ~ "2010 - 2019",
       year >= 2020 ~ "2020 - 2024"
-    )) %>%
-    summarize(value = median(owe_b), count = n(), .by = decade) %>%
-    ggplot(aes(x = decade, y = value)) +
-    geom_bar(stat = "identity", width = 0.67, fill = color_3) +
+    )) |> 
+    select(study_id, decade, owe_b)
+  
+  decade_summaries = data |> 
+    summarize(
+      Median = median(owe_b), 
+      Mean = mean(owe_b),
+      .by = decade
+    ) |> 
+    pivot_longer(-decade)
+  
+  data |> 
+    rename(value = owe_b) |> 
+    mutate(name = "owe_b") |> 
+    bind_rows(decade_summaries) |> 
+    mutate(point_size = case_match(
+      name,
+     "Mean" ~ 2, 
+     "Median" ~ 2, 
+     "owe_b" ~ 5
+    )) |> 
+    ggplot(aes(x = decade, y = value, color = name)) + 
+    geom_point(aes(alpha = name, size = name, shape = name), stroke = 0.7) +
+    scale_color_manual(name = "", values = colors, breaks = c("Mean", "Median")) +
+    scale_alpha_manual(values = alpha_values) + 
+    scale_size_manual(name = "", values = point_sizes, breaks = c("Mean", "Median")) +
+    scale_shape_manual(name = "", values = point_shapes, breaks = c("Mean", "Median")) +
+    scale_y_continuous(limits = c(-2.5, 2), minor_breaks = NULL) + 
+    guides(alpha = "none") + 
     theme_minimal(base_family = "Roboto Condensed") +
     theme(
       axis.title.x = element_blank(),
       axis.title.y = element_blank(),
-      text = element_text(size=13, color = "grey30"),
-      legend.title = element_blank(),
+      text = element_text(size=12, color = "grey30"),
       panel.grid.major.x = element_blank(),
-      legend.key.spacing.y  = unit(0.3, "cm"),
-      legend.key.width = unit(0.7, "cm")
+      legend.key.spacing.y  = unit(0.1, "cm")
     )
-  
-  # owe_data %>% 
-  #   filter(published == 1) %>% 
-  #   ggplot(aes(x = year, y = owe_b)) + 
-  #   geom_point() + 
-  #   geom_smooth()
 }
-
-
-
-
-
-
