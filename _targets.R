@@ -9,8 +9,14 @@ owe_database <- "https://economic.github.io/owe/mw_owe_repository.csv"
 lapply(list.files("R", full.names = TRUE), source)
 
 tar_plan(
+  
+  # owe data from web
   owe_data = grab_owe_data(owe_database, download_date),
-
+  
+  # ns papers with dz study id
+  tar_file(ns_dz_matches_csv, "ns_dz_match.csv"),
+  
+  # histogram names
   histogram_inputs = define_histograms(),
   
   # all histograms, as list
@@ -88,6 +94,7 @@ tar_plan(
   tar_file(
     paper_stats_csv, create_paper_stats_csv(
       owe_data,
+      ns_dz_matches_csv,
       "docs/paper_stats.csv"
     )
   )

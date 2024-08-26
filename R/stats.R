@@ -1,4 +1,6 @@
-create_paper_stats_csv = function(data, file_name) {
+create_paper_stats_csv = function(data, ns_dz_matches, file_name) {
+  ns_dz_matches = read_csv(ns_dz_matches, show_col_types = FALSE)
+  
   median_owe_all = data |> 
     summarize(value = median(owe_b)) |> 
     mutate(value = label_number(accuracy = 0.01)(value)) |> 
@@ -207,6 +209,31 @@ create_paper_stats_csv = function(data, file_name) {
     mutate(value = label_number(accuracy = 0.01)(value)) |> 
     mutate(name = "Mean OWE, restaurants/retail")
   
+  negative_owe_share = data %>% 
+    filter(published == 1) %>% 
+    summarize(value = mean(owe_b < 0)) %>% 
+    mutate(value = label_percent(accuracy = 1)(value)) %>% 
+    mutate(name = "Share of published studies with negative OWE")
+  
+  negative_owe_share_us_2021 = data %>% 
+    filter(published == 1, country == "US", year <= 2021) %>% 
+    summarize(value = mean(owe_b < 0)) %>% 
+    mutate(value = label_percent(accuracy = 1)(value)) %>% 
+    mutate(name = "Share of published US studies in 2021 or before with negative OWE")
+  
+  number_studies_ns_dz_overlap = ns_dz_matches %>% 
+    filter(!is.na(dz_id)) %>% 
+    count() %>% 
+    mutate(value = as.character(n)) %>% 
+    mutate(name = "Number of studies, NS DZ intersection")
+  
+  median_owe_ns_dz_overlap = ns_dz_matches %>% 
+    filter(!is.na(dz_id)) %>% 
+    inner_join(data, by = join_by(dz_id == study_id)) %>% 
+    summarize(value = median(owe_b)) %>% 
+    mutate(value = label_number(accuracy = 0.01)(value)) %>% 
+    mutate(name = "Median OWE, NS DZ intersection")
+  
   results = bind_rows(
       median_owe, mean_owe, median_broad,
       count_studies_all, count_studies_published,
@@ -223,7 +250,10 @@ create_paper_stats_csv = function(data, file_name) {
       broad_owe_2020_share, narrow_owe_2020_share,
       owe_2010_broad_v_narrow, number_studies_2010_broad_v_narrow,
       number_studies_rr, number_studies_teen,
-      median_teen, mean_teen, median_rr, mean_rr
+      median_teen, mean_teen, median_rr, mean_rr,
+      negative_owe_share, negative_owe_share_us_2021,
+      number_studies_ns_dz_overlap,
+      median_owe_ns_dz_overlap
     ) |> 
     select(name, value)
   

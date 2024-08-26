@@ -270,8 +270,8 @@ make_range_plot <- function(data) {
 
 
 rolling_stats <- function(data, central_year) {
-  begin_year <- central_year - 5
-  end_year <- central_year + 4
+  begin_year <- central_year - 9
+  end_year <- central_year
   
   filtered_data <- data %>% 
     filter(year >= begin_year, year <= end_year) 
@@ -295,24 +295,24 @@ make_rolling_plot <- function(owe_data) {
   
   color_1 <- c("#440154FF")
   color_2 <- c("#21908CFF")
-  color_3 <- c("#3B528BFF")
-  
+
   data <- owe_data %>% 
     filter(published == 1)
-  
-  map(1996:2020, ~ rolling_stats(data, .x)) %>% 
-    list_rbind() %>% 
-    filter(name %in% c("median", "mean"), year >= 2005) %>% 
-    ggplot(aes(x = year, y = value, color = name)) + 
+
+
+  map(2001:2024, ~ rolling_stats(data, .x)) %>%
+    list_rbind() %>%
+    filter(name %in% c("median", "mean")) %>%
+    ggplot(aes(x = year, y = value, color = name)) +
     geom_point() +
-    geom_line() + 
+    geom_line() +
     annotate(
       "text",
       y = 0.04,
       x = 2019.7,
       label = "Median OWE",
       hjust = 1,
-      size = 3.5, 
+      size = 3.5,
       color = color_2,
       family = "Roboto Condensed"
     ) +
@@ -322,12 +322,12 @@ make_rolling_plot <- function(owe_data) {
       x = 2019.7,
       label = "Mean OWE",
       hjust = 1,
-      size = 3.5, 
+      size = 3.5,
       color = color_1,
       family = "Roboto Condensed"
     ) +
-    scale_y_continuous(limits = c(-0.5, 0.1)) +
-    scale_color_manual(values = c(color_1, color_2)) + 
+    #scale_y_continuous(limits = c(-0.6, 0.3)) +
+    scale_color_manual(values = c(color_1, color_2)) +
     theme_minimal(base_family = "Roboto Condensed") +
     theme(
       axis.title.x = element_blank(),
@@ -375,33 +375,33 @@ make_owe_decade_plot <- function(owe_data) {
   color_2 <- c("#21908CFF")
   color_3 <- c("#3B528BFF")
   
+  owe_data %>%
+    filter(published == 1) %>%
+    mutate(decade = case_when(
+      year >= 1990 & year < 2000 ~ "1992 - 1999",
+      year >= 2000 & year < 2010 ~ "2000 - 2009",
+      year >= 2010 & year < 2020 ~ "2010 - 2019",
+      year >= 2020 ~ "2020 - 2024"
+    )) %>%
+    summarize(value = median(owe_b), count = n(), .by = decade) %>%
+    ggplot(aes(x = decade, y = value)) +
+    geom_bar(stat = "identity", width = 0.67, fill = color_3) +
+    theme_minimal(base_family = "Roboto Condensed") +
+    theme(
+      axis.title.x = element_blank(),
+      axis.title.y = element_blank(),
+      text = element_text(size=13, color = "grey30"),
+      legend.title = element_blank(),
+      panel.grid.major.x = element_blank(),
+      legend.key.spacing.y  = unit(0.3, "cm"),
+      legend.key.width = unit(0.7, "cm")
+    )
+  
   # owe_data %>% 
   #   filter(published == 1) %>% 
-  #   mutate(decade = case_when(
-  #     year >= 1990 & year < 2000 ~ "1992 - 1999",
-  #     year >= 2000 & year < 2010 ~ "2000 - 2009",
-  #     year >= 2010 & year < 2020 ~ "2010 - 2019",
-  #     year >= 2020 ~ "2020 - 2024"
-  #   )) %>% 
-  #   summarize(value = median(owe_b), count = n(), .by = decade) %>% 
-  #   ggplot(aes(x = decade, y = value)) + 
-  #   geom_bar(stat = "identity", width = 0.67, fill = color_3) +
-  #   theme_minimal(base_family = "Roboto Condensed") +
-  #   theme(
-  #     axis.title.x = element_blank(),
-  #     axis.title.y = element_blank(),
-  #     text = element_text(size=13, color = "grey30"),
-  #     legend.title = element_blank(),
-  #     panel.grid.major.x = element_blank(),
-  #     legend.key.spacing.y  = unit(0.3, "cm"),
-  #     legend.key.width = unit(0.7, "cm")
-  #   )
-  
-  owe_data %>% 
-    filter(published == 1) %>% 
-    ggplot(aes(x = year, y = owe_b)) + 
-    geom_point() + 
-    geom_smooth()
+  #   ggplot(aes(x = year, y = owe_b)) + 
+  #   geom_point() + 
+  #   geom_smooth()
 }
 
 
