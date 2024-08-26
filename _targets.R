@@ -75,7 +75,7 @@ tar_plan(
   ),
   
   # Median OWE by decade bar plot
-  owe_decade_plot = make_owe_decade_plot(owe_data),
+  owe_decade_plot = make_owe_decade_plot(owe_data, boot_central),
   tar_file(
     owe_decade_file, 
     save_plot(owe_decade_plot, "docs/owe_decade.pdf", w = 7, h = 4.67)

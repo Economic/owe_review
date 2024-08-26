@@ -301,7 +301,16 @@ make_owe_reported_plot <- function(owe_data) {
     )
 }
 
-make_owe_decade_plot <- function(owe_data) {
+make_owe_decade_plot <- function(owe_data, bootstraps) {
+  
+  bootstraps = bootstraps |> 
+    select(decade, boot_se, name) |> 
+    mutate(name = case_match(
+      name,
+      "median" ~ "Median",
+      "mean" ~ "Mean"
+    ))
+  
   color_1 <- c("#440154FF")
   color_2 <- c("#21908CFF")
   color_3 <- c("#3B528BFF")
@@ -327,7 +336,12 @@ make_owe_decade_plot <- function(owe_data) {
       Mean = mean(owe_b),
       .by = decade
     ) |> 
-    pivot_longer(-decade)
+    pivot_longer(-decade) |> 
+    inner_join(bootstraps, by = c("decade", "name")) |> 
+    mutate(
+      ci_95_lo = value - 1.96 * boot_se,
+      ci_95_hi = value + 1.96 * boot_se
+    )
   
   data |> 
     rename(value = owe_b) |> 
@@ -339,13 +353,31 @@ make_owe_decade_plot <- function(owe_data) {
      "Median" ~ 2, 
      "owe_b" ~ 5
     )) |> 
-    ggplot(aes(x = decade, y = value, color = name)) + 
+    mutate(decade_x = case_when(
+      decade == "1992 - 1999" ~ 1,
+      decade == "2000 - 2009" ~ 2,
+      decade == "2010 - 2019" ~ 3,
+      decade == "2020 - 2024" ~ 4
+    )) |> 
+    mutate(decade_x = case_match(
+      name,
+      "Median" ~ decade_x + 0.09,
+      "Mean" ~ decade_x + 0.2,
+      .default = decade_x
+    )) |> 
+    ggplot(aes(x = decade_x, y = value, color = name)) + 
     geom_point(aes(alpha = name, size = name, shape = name), stroke = 0.7) +
+    geom_errorbar(aes(ymin = ci_95_lo, ymax = ci_95_hi)) +
     scale_color_manual(name = "", values = colors, breaks = c("Mean", "Median")) +
     scale_alpha_manual(values = alpha_values) + 
     scale_size_manual(name = "", values = point_sizes, breaks = c("Mean", "Median")) +
     scale_shape_manual(name = "", values = point_shapes, breaks = c("Mean", "Median")) +
     scale_y_continuous(limits = c(-2.5, 2), minor_breaks = NULL) + 
+    scale_x_continuous(
+      breaks = seq(1, 4), 
+      labels = c("1992 - 1999", "2000 - 2009", "2010 - 2019", "2020 - 2024"),
+      minor_breaks = NULL
+    ) +
     guides(alpha = "none") + 
     theme_minimal(base_family = "Roboto Condensed") +
     theme(
