@@ -45,3 +45,16 @@ combine_ns_dz = function(ns_data, ns_dz_matches, owe_data) {
   # Godoey Reich 2021
   # Leung 2021
 }
+
+ 
+# tar_read(combined_ns_dz) %>% 
+#   filter(is.na(ns_study_id), !is.na(dz_study_id)) %>% 
+#   distinct(dz_study_id, .keep_all = T) %>% 
+#   filter(dz_published == 1, dz_country == "US", dz_year <= 2021) %>%
+#   summarize(
+#     mean_ns_elast = mean(ns_elast), 
+#     median_ns_elast = median(ns_elast), 
+#     n = n(), 
+#     median_dz_owe = median(dz_owe), 
+#     mean_dz_owe = mean(dz_owe)
+#   )
