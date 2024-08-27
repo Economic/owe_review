@@ -13,8 +13,14 @@ tar_plan(
   tar_file(owe_data_csv, "mw_owe_repository.csv"),
   owe_data = read_csv(owe_data_csv, show_col_types = FALSE),
   
-  # ns papers with dz study id
-  tar_file(ns_dz_matches_csv, "ns_dz_match.csv"),
+  # ns data
+  tar_file(ns_data_xls, "MW_Papers_1992_2020_Final.xlsx"),
+  tar_file(ns_dz_matches_csv, "ns_dz_studies.csv"),
+  
+  # combine ns data and owe data
+  ns_data = read_ns_data(ns_data_xls),
+  ns_dz_matches = read_csv(ns_dz_matches_csv, show_col_types = FALSE),
+  combined_ns_dz = combine_ns_dz(ns_data, ns_dz_matches, owe_data),
   
   # bootstrapped median and mean by decade
   boot_central = bootstrap_by_decade(owe_data),
@@ -90,7 +96,7 @@ tar_plan(
   tar_file(
     paper_stats_csv, create_paper_stats_csv(
       owe_data,
-      ns_dz_matches_csv,
+      ns_dz_matches,
       "docs/paper_stats.csv"
     )
   )

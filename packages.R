@@ -16,4 +16,5 @@ suppressPackageStartupMessages({
   library(scales)
   library(broom)
   library(boot)
+  library(readxl)
 })

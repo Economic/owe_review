@@ -1,6 +1,5 @@
 create_paper_stats_csv = function(data, ns_dz_matches, file_name) {
-  ns_dz_matches = read_csv(ns_dz_matches, show_col_types = FALSE)
-  
+
   median_owe_all = data |> 
     summarize(value = median(owe_b)) |> 
     mutate(value = label_number(accuracy = 0.01)(value)) |> 
@@ -221,15 +220,28 @@ create_paper_stats_csv = function(data, ns_dz_matches, file_name) {
     mutate(value = label_percent(accuracy = 1)(value)) %>% 
     mutate(name = "Share of published US studies in 2021 or before with negative OWE")
   
+  size_by_period = data %>% 
+    filter(published == 1) %>% 
+    mutate(period = if_else(year >= 2010, "Post-2010", "Pre-2010")) %>% 
+    mutate(size = if_else(
+      owe_magnitude %in% c("Large negative", "Medium negative"), 
+      "large/medium negative",
+      "positive or small negative"
+    )) %>% 
+    count(period, size) %>% 
+    mutate(value = as.character(n)) %>% 
+    mutate(name = paste("Number of studies", period, size))
+    
+  
   number_studies_ns_dz_overlap = ns_dz_matches %>% 
-    filter(!is.na(dz_id)) %>% 
+    filter(!is.na(dz_study)) %>% 
     count() %>% 
     mutate(value = as.character(n)) %>% 
     mutate(name = "Number of studies, NS DZ intersection")
   
   median_owe_ns_dz_overlap = ns_dz_matches %>% 
-    filter(!is.na(dz_id)) %>% 
-    inner_join(data, by = join_by(dz_id == study_id)) %>% 
+    filter(!is.na(dz_study)) %>% 
+    inner_join(data, by = join_by(dz_study == study_id)) %>% 
     summarize(value = median(owe_b)) %>% 
     mutate(value = label_number(accuracy = 0.01)(value)) %>% 
     mutate(name = "Median OWE, NS DZ intersection")
@@ -251,6 +263,7 @@ create_paper_stats_csv = function(data, ns_dz_matches, file_name) {
       owe_2010_broad_v_narrow, number_studies_2010_broad_v_narrow,
       number_studies_rr, number_studies_teen,
       median_teen, mean_teen, median_rr, mean_rr,
+      size_by_period,
       negative_owe_share, negative_owe_share_us_2021,
       number_studies_ns_dz_overlap,
       median_owe_ns_dz_overlap
