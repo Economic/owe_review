@@ -53,6 +53,15 @@ tar_plan(
     "Restaurants or retail",
     "docs/histogram_teens_rr.pdf"
   )),
+  
+  # before / after 2010 pdf
+  tar_file(histogram_2010_file, pair_histograms_pdf(
+    all_histograms$before_2010, 
+    all_histograms$after_2010,
+    "Published between 1992 and 2009",
+    "Published between 2010 and 2024",
+    "docs/histogram_before_after_2010.pdf"
+  )),
 
   # summary table
   tar_file(

@@ -14,7 +14,9 @@ define_histograms <- function() {
     "broad", "published == 1 & overall == 1", "percent",
     "narrow", "published == 1 & overall != 1", "percent",
     "rr", "published == 1 & restaurants_retail == 1", "percent",
-    "teens", "published == 1 & teens == 1", "percent"
+    "teens", "published == 1 & teens == 1", "percent",
+    "before_2010", "published == 1 & year < 2010", "percent",
+    "after_2010", "published == 1 & year >= 2010", "percent"
   ) 
 }
 
