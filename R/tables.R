@@ -39,8 +39,6 @@ make_summary_table <- function(data, file) {
       col.names = c("", "{Number of studies}", "{Median OWE}", "{Mean OWE}"),
       linesep = ""
     ) %>% 
-    # pack_rows("Overall", 1, 10) %>%
-    # pack_rows("Published and peer-reviewed", 11, 20) %>% 
     add_indent(positions = 3:12) %>% 
     column_spec(1, bold = if_else(
       table_data$category %in% c("All studies", "All published studies"), 
@@ -52,10 +50,6 @@ make_summary_table <- function(data, file) {
     str_replace_all("Number of studies", "\\\\thead\\{Number\\\\\\\\of studies\\}") %>% 
     str_replace_all("Median OWE", "\\\\thead\\{Median\\\\\\\\OWE\\}") %>% 
     str_replace_all("Mean OWE", "\\\\thead\\{Mean\\\\\\\\OWE\\}") %>% 
-    # str_replace("Large negative", "\\\\thead\\{Large\\\\\\\\negative\\}") %>% 
-    # str_replace("Medium negative", "\\\\thead\\{Medium\\\\\\\\negative\\}") %>% 
-    # str_replace("Small negative", "\\\\thead\\{Small\\\\\\\\negative\\}") %>% 
-    # str_replace("Zero or positive", "\\\\thead\\{Zero\\\\\\\\or positive\\}") %>% 
     save_kable_tex_fragment(file)
   
   file
@@ -96,6 +90,59 @@ make_hypothetical_table <- function(file) {
     pack_rows("Case B", 4, 6) %>% 
     # fix percent signs
     str_replace_all("\\%", "\\\\%") %>% 
+    save_kable_tex_fragment(file)
+  
+  file
+}
+
+
+make_country_table <- function(data, file) {
+  published = data |> 
+    filter(published == 1)
+    count(country)
+  
+  
+  published <- data %>% 
+    filter(published == 1) %>% 
+    summary_df() %>% 
+    mutate(panel = "published") %>% 
+    mutate(category = if_else(
+      category == "All studies", 
+      "All published studies", 
+      category
+    ))
+  
+  table_data <- data %>% 
+    summary_df() %>% 
+    filter(category == "All studies") %>% 
+    mutate(panel = "overall") %>% 
+    bind_rows(published) %>% 
+    select(-panel) %>% 
+    relocate(
+      category, 
+      count, 
+      median, 
+      mean
+    )
+  
+  table_data %>% 
+    kbl(
+      booktabs = T, 
+      format = "latex",
+      col.names = c("", "{Number of studies}", "{Median OWE}", "{Mean OWE}"),
+      linesep = ""
+    ) %>% 
+    add_indent(positions = 3:12) %>% 
+    column_spec(1, bold = if_else(
+      table_data$category %in% c("All studies", "All published studies"), 
+      TRUE, 
+      FALSE
+    )) %>% 
+    str_replace_all("\\\\\\{", "\\{") %>% 
+    str_replace_all("\\\\\\}", "\\}") %>% 
+    str_replace_all("Number of studies", "\\\\thead\\{Number\\\\\\\\of studies\\}") %>% 
+    str_replace_all("Median OWE", "\\\\thead\\{Median\\\\\\\\OWE\\}") %>% 
+    str_replace_all("Mean OWE", "\\\\thead\\{Mean\\\\\\\\OWE\\}") %>% 
     save_kable_tex_fragment(file)
   
   file
