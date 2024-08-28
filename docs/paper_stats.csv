@@ -1,49 +1,63 @@
 name,value
-Median OWE (published studies),-0.12
-Mean OWE (published studies),-0.23
+Median OWE (published studies),-0.13
+Mean OWE (published studies),-0.25
 "Median OWE, broad group",0.02
-"Number of studies, all studies",87
-"Number of studies, published studies",71
-Share of studies with OWE >= -0.4,72%
+"Number of studies, all studies",88
+"Number of studies, published studies",72
+Share of studies with OWE >= -0.4,71%
 Number of journals in repository,30
 Journal with at least 4 studies #1,ILR Review (13)
 Journal with at least 4 studies #2,Journal of Labor Economics (8)
 Journal with at least 4 studies #3,Industrial Relations (6)
-Journal with at least 4 studies #4,Labour Economics (5)
-Journal with at least 4 studies #5,The Journal of Human Resources (4)
+Journal with at least 4 studies #4,Journal of Human Resources (5)
+Journal with at least 4 studies #5,Labour Economics (5)
 Journal with at least 4 studies #6,The Review of Economics and Statistics (4)
-"Studies with average of multiple estimates, all",19
-"Studies with average of multiple estimates, published",14
+"Studies with average of multiple estimates, all",20
+"Studies with average of multiple estimates, published",15
 "Studies reporting OWE, all",34
 "Studies reporting OWE, published",29
-"Published since 2010, count",48
+"Published since 2010, count",49
 "Published since 2010, share",68%
 "Studies without SE, all",10
 "Studies without SE, published",6
 Median OWE (all studies),-0.14
-Mean OWE (all studies),-0.21
-"Median OWE, United States",-0.09
-"Mean OWE, United States",-0.20
-"Number of studies, narrow groups",50
+Mean OWE (all studies),-0.22
+"Median OWE, United States",-0.11
+"Mean OWE, United States",-0.22
+"Number of studies, narrow groups",51
 "Number of studies, broad groups",21
-"Median OWE, narrow group",-0.16
+"Median OWE, narrow group",-0.17
 Share of broad studies published since 2020,62%
-Share of narrow studies published since 2020,26%
-"Median OWE in year >= 2010, narrow group",-0.06
+Share of narrow studies published since 2020,27%
+"Median OWE in year >= 2010, narrow group",-0.08
 "Median OWE in year >= 2010, broad group",0.02
-"Number of published studies in year >= 2010, narrow group",30
+"Number of published studies in year >= 2010, narrow group",31
 "Number of published studies in year >= 2010, broad group",18
-"Number of studies, restaurants/retail",20
+"Number of studies, restaurants/retail",21
 "Number of studies, teenagers",15
 "Median OWE, teens",-0.17
 "Mean OWE, teens",-0.25
 "Median OWE, restaurants/retail",-0.09
-"Mean OWE, restaurants/retail",-0.11
-Number of studies Post-2010 large/medium negative,9
+"Mean OWE, restaurants/retail",-0.17
+Number of studies Post-2010 large/medium negative,10
 Number of studies Post-2010 positive or small negative,39
 Number of studies Pre-2010 large/medium negative,11
 Number of studies Pre-2010 positive or small negative,12
-Share of published studies with negative OWE,59%
-Share of published US studies in 2021 or before with negative OWE,60%
-"Number of studies, NS DZ intersection",35
-"Median OWE, NS DZ intersection",-0.17
+"Number of studies, 1992 - 1999",6
+"Number of studies, 2000 - 2009",17
+"Number of studies, 2010 - 2019",22
+"Number of studies, 2020 - 2024",27
+"Median OWE, 2000 - 2009",-0.45
+"Mean OWE, 2000 - 2009",-0.52
+"Median OWE, 2010 - 2019",-0.12
+"Mean OWE, 2010 - 2019",-0.29
+"Median OWE, 2020 - 2024",0.00
+"Mean OWE, 2020 - 2024",-0.15
+"Median OWE, 1992 - 1999",0.15
+"Mean OWE, 1992 - 1999",0.27
+"Difference of means  , 2000-2009 and 2020-2024, p-value",0.073
+"Difference of medians, 2000-2009 and 2020-2024, p-value",0.033
+Share of published studies with negative OWE,60%
+Share of published US studies in 2021 or before with negative OWE,61%
+"Number of studies, NS DZ intersection",36
+"Median OWE, NS DZ intersection",-0.20

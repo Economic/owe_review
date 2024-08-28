@@ -16,7 +16,13 @@ bootstrap_by_decade = function(data, seed) {
     )) |>
     nest_by(decade) |> 
     mutate(
-      results = list(boot(data, statistic = central_tendencies, R = 1000000)),
+      results = list(boot(
+        data, 
+        statistic = central_tendencies, 
+        R = 1000000, 
+        parallel = "multicore", 
+        ncpus = 4
+      )),
       tidy_boot = list(broom::tidy(results))
     ) |> 
     unnest(tidy_boot) |> 

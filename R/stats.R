@@ -231,8 +231,55 @@ create_paper_stats_csv = function(data, ns_dz_matches, file_name) {
     count(period, size) %>% 
     mutate(value = as.character(n)) %>% 
     mutate(name = paste("Number of studies", period, size))
-    
   
+  decade_data = data %>% 
+    mutate(decade = case_when(
+      year >= 1990 & year < 2000 ~ "1992 - 1999",
+      year >= 2000 & year < 2010 ~ "2000 - 2009",
+      year >= 2010 & year < 2020 ~ "2010 - 2019",
+      year >= 2020 ~ "2020 - 2024"
+    )) 
+  
+  number_studies_by_decade = decade_data %>% 
+    filter(published == 1) %>% 
+    count(decade) %>% 
+    mutate(
+      name = paste("Number of studies,", decade),
+      value = as.character(n)
+    )
+  
+  mean_median_by_decade = decade_data %>% 
+    filter(published == 1) %>% 
+    summarize(
+      Median = median(owe_b),
+      Mean = mean(owe_b),
+      .by = decade
+    ) %>% 
+    pivot_longer(-decade) %>% 
+    mutate(
+      name = paste(name, "OWE,", decade),
+      value = label_number(accuracy = 0.01)(value)
+    ) 
+  
+  data_2000_2020 = decade_data |> 
+    filter(published == 1) |> 
+    filter(decade %in% c("2000 - 2009", "2020 - 2024"))
+  
+  model_lm = lm_robust(owe_b ~ decade - 1, data = data_2000_2020, se_type = "HC1")
+  model_rq = rq(owe_b ~ decade - 1, data = data_2000_2020, tau = 0.5)
+  model_rq_vcov = summary(model_rq, se = "nid", covariance = T)$cov
+  null_hypothesis = "`decade2000 - 2009` = `decade2020 - 2024`"
+  data_2000_2020_df = nrow(data_2000_2020) - 2
+  model_rq_test = hypotheses(model_rq, null_hypothesis, df = data_2000_2020_df, vcov = model_rq_vcov)
+  model_lm_test = hypotheses(model_lm, null_hypothesis, df = data_2000_2020_df)
+  
+  mean_median_reg_tests = tribble(
+    ~name, ~value,
+    "Difference of means  , 2000-2009 and 2020-2024, p-value", model_lm_test$p,
+    "Difference of medians, 2000-2009 and 2020-2024, p-value", model_rq_test$p
+  ) |> 
+    mutate(value = label_number(accuracy = 0.001)(value))
+    
   number_studies_ns_dz_overlap = ns_dz_matches %>% 
     filter(!is.na(dz_study)) %>% 
     count() %>% 
@@ -264,6 +311,7 @@ create_paper_stats_csv = function(data, ns_dz_matches, file_name) {
       number_studies_rr, number_studies_teen,
       median_teen, mean_teen, median_rr, mean_rr,
       size_by_period,
+      number_studies_by_decade, mean_median_by_decade, mean_median_reg_tests,
       negative_owe_share, negative_owe_share_us_2021,
       number_studies_ns_dz_overlap,
       median_owe_ns_dz_overlap
