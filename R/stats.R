@@ -261,25 +261,47 @@ create_paper_stats_csv = function(data, ns_dz_matches, file_name) {
       value = label_number(accuracy = 0.01)(value)
     ) 
   
-  data_2000_2020 = decade_data |> 
-    filter(published == 1) |> 
-    filter(decade %in% c("2000 - 2009", "2020 - 2024"))
+  data_compare_decades = data |> 
+    filter(
+      published == 1,
+      year %in% c(2000:2009, 2020:2024)
+    ) |> 
+    mutate(post = if_else(year >= 2020, 1, 0))
   
-  model_lm = lm_robust(owe_b ~ decade - 1, data = data_2000_2020, se_type = "HC1")
-  model_rq = rq(owe_b ~ decade - 1, data = data_2000_2020, tau = 0.5)
-  model_rq_vcov = summary(model_rq, se = "nid", covariance = T)$cov
-  null_hypothesis = "`decade2000 - 2009` = `decade2020 - 2024`"
-  data_2000_2020_df = nrow(data_2000_2020) - 2
-  model_rq_test = hypotheses(model_rq, null_hypothesis, df = data_2000_2020_df, vcov = model_rq_vcov)
-  model_lm_test = hypotheses(model_lm, null_hypothesis, df = data_2000_2020_df)
+  model_lm = feols(owe_b ~ post, data = data_compare_decades)
+  model_rq = rq(owe_b ~ post, data = data_compare_decades, tau = 0.5)
+  rq_p = tidy(model_rq, se.type = "nid", conf.int = T) |> 
+    filter(term == "post") |> 
+    pull(p.value)
+  lm_p = tidy(model_lm, se = "HC1", conf.int = T) |> 
+    filter(term == "post") |> 
+    pull(p.value)
   
   mean_median_reg_tests = tribble(
     ~name, ~value,
-    "Difference of means  , 2000-2009 and 2020-2024, p-value", model_lm_test$p,
-    "Difference of medians, 2000-2009 and 2020-2024, p-value", model_rq_test$p
+    "Null: equality of means  , 2000-2009 and 2020-2024, p-value", lm_p,
+    "Null: equality of medians, 2000-2009 and 2020-2024, p-value", rq_p
   ) |> 
     mutate(value = label_number(accuracy = 0.001)(value))
-    
+  
+  data_compare_2010 = data |> 
+    filter(published == 1) |> 
+    mutate(
+      medium_large = if_else(owe_b < -0.4, 1, 0),
+      post = if_else(year >= 2010, 1, 0)
+    )
+  
+  medium_large_2010_p = feols(medium_large ~ post, data = data_compare_2010) |> 
+    broom::tidy(se = "HC1", conf.int = T) |> 
+    filter(term == "post") |> 
+    pull(p.value)
+  
+  medium_large_2010_test = tibble(
+    name = "Null: equality of medium/large negative share, before and after 2010, p-value ",
+    value = medium_large_2010_p
+  ) |> 
+    mutate(value = label_number(accuracy = 0.001)(value))
+  
   number_studies_ns_dz_overlap = ns_dz_matches %>% 
     filter(!is.na(dz_study)) %>% 
     count() %>% 
@@ -312,6 +334,7 @@ create_paper_stats_csv = function(data, ns_dz_matches, file_name) {
       median_teen, mean_teen, median_rr, mean_rr,
       size_by_period,
       number_studies_by_decade, mean_median_by_decade, mean_median_reg_tests,
+      medium_large_2010_test,
       negative_owe_share, negative_owe_share_us_2021,
       number_studies_ns_dz_overlap,
       median_owe_ns_dz_overlap

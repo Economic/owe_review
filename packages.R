@@ -18,6 +18,5 @@ suppressPackageStartupMessages({
   library(boot)
   library(readxl)
   library(quantreg)
-  library(estimatr)
-  library(marginaleffects)
+  library(fixest)
 })

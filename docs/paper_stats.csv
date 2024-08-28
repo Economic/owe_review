@@ -55,8 +55,9 @@ Number of studies Pre-2010 positive or small negative,12
 "Mean OWE, 2020 - 2024",-0.15
 "Median OWE, 1992 - 1999",0.15
 "Mean OWE, 1992 - 1999",0.27
-"Difference of means  , 2000-2009 and 2020-2024, p-value",0.073
-"Difference of medians, 2000-2009 and 2020-2024, p-value",0.033
+"Null: equality of means  , 2000-2009 and 2020-2024, p-value",0.073
+"Null: equality of medians, 2000-2009 and 2020-2024, p-value",0.033
+"Null: equality of medium/large negative share, before and after 2010, p-value ",0.026
 Share of published studies with negative OWE,60%
 Share of published US studies in 2021 or before with negative OWE,61%
 "Number of studies, NS DZ intersection",36
