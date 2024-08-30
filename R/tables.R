@@ -60,7 +60,7 @@ make_hypothetical_table <- function(file) {
     ~sector, ~aff_share, ~mw_e, ~mw_w,
     "All workers", 0.10, 0.01, 0.03,
     "Retail", 0.15, -0.03, 0.20,
-    "Restaurants", 0.40, -0.10, 0.45,
+    "Restaurants", 0.50, -0.10, 0.50,
     "All workers", 0.05, -0.02, 0.00,
     "Retail", 0.10, -0.02, 0.10,
     "Restaurants", 0.30, -0.05, 0.25
@@ -134,12 +134,34 @@ make_country_table <- function(data, file) {
 }
 
 make_dz_ns_table = function(data, file) {
-  table_data = data |> 
+  cells = data |> 
     filter(dz_published == 1 | is.na(dz_published)) |> 
     filter(dz_country == "US" | is.na(dz_country)) |> 
     count(dz_status, ns_status) |> 
-    mutate(value = as.character(n)) |> 
+    mutate(value = as.character(n)) 
+  
+  total_studies = cells |> 
+    summarize(sum(n)) |> 
+    pull() |> 
+    as.character()
+  
+  dz_totals = cells |> 
+    summarize(`DZ total` = as.character(sum(n)), .by = dz_status)
+  
+  ns_totals = cells |> 
+    summarize(value = sum(n), .by = ns_status) |> 
+    mutate(value = as.character(value)) |> 
+    pivot_wider(names_from = ns_status) |> 
+    mutate(across(everything(), as.character)) |> 
+    mutate(
+      dz_status = "NS status total",
+      `DZ total` = total_studies
+    )
+    
+  table_data = cells |> 
     pivot_wider(id_cols = dz_status, names_from = ns_status) |> 
+    full_join(dz_totals, by = "dz_status") |> 
+    bind_rows(ns_totals) |> 
     mutate(across(everything(), ~ replace_na(.x, ""))) |> 
     relocate(dz_status, `NS missing`, `NS negative`, `NS positive`)
   
@@ -147,12 +169,14 @@ make_dz_ns_table = function(data, file) {
     kbl(
       booktabs = T, 
       format = "latex",
-      col.names = c("", "{NS missing}", "{NS negative}", "{NS positive}"),
+      col.names = c("", "{NS missing}", "{NS negative}", "{NS positive}", "{DZ status total}"),
       linesep = ""
     ) |> 
+    column_spec(1:5, bold = if_else(table_data$dz_status == "NS status total", TRUE, FALSE)) %>% 
+    column_spec(5, bold = TRUE) %>% 
     str_replace_all("\\\\\\{", "\\{") %>%
     str_replace_all("\\\\\\}", "\\}") %>%
-    # str_replace_all("All studies", "\\\\thead\\{All studies\\}") %>% 
+    str_replace_all("DZ status total", "\\\\textbf\\{DZ status total\\}") %>% 
     # str_replace_all("Published studies", "\\\\thead\\{Published studies\\}") %>% 
     save_kable_tex_fragment(file)
   

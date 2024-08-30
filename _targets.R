@@ -48,10 +48,10 @@ tar_plan(
   
   # teens vs restaurants/retail histograms pdf
   tar_file(histogram_teens_rr_file, pair_histograms_pdf(
-    all_histograms$teens, 
     all_histograms$rr,
-    "Teenagers",
+    all_histograms$teens, 
     "Restaurants or retail",
+    "Teenagers",
     "docs/histogram_teens_rr.pdf"
   )),
   

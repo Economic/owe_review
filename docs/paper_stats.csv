@@ -1,10 +1,10 @@
 name,value
 Median OWE (published studies),-0.13
 Mean OWE (published studies),-0.25
-"Median OWE, broad group",0.02
+"Median OWE, published, broad group",0.02
 "Number of studies, all studies",88
 "Number of studies, published studies",72
-Share of studies with OWE >= -0.4,71%
+Share of published studies with OWE >= -0.4,71%
 Number of journals in repository,30
 Journal with at least 4 studies #1,ILR Review (13)
 Journal with at least 4 studies #2,Journal of Labor Economics (8)
@@ -22,39 +22,39 @@ Journal with at least 4 studies #6,The Review of Economics and Statistics (4)
 "Studies without SE, published",6
 Median OWE (all studies),-0.14
 Mean OWE (all studies),-0.22
-"Median OWE, United States",-0.11
-"Mean OWE, United States",-0.22
-"Number of studies, narrow groups",51
-"Number of studies, broad groups",21
-"Median OWE, narrow group",-0.17
+"Median OWE, published, United States",-0.11
+"Mean OWE, published, United States",-0.22
+"Number of published studies, narrow groups",51
+"Number of published studies, broad groups",21
+"Median OWE, published, narrow group",-0.17
 Share of broad studies published since 2020,62%
 Share of narrow studies published since 2020,27%
-"Median OWE in year >= 2010, narrow group",-0.08
-"Median OWE in year >= 2010, broad group",0.02
+"Median OWE in year >= 2010, published, narrow group",-0.08
+"Median OWE in year >= 2010, published, broad group",0.02
 "Number of published studies in year >= 2010, narrow group",31
 "Number of published studies in year >= 2010, broad group",18
-"Number of studies, restaurants/retail",21
-"Number of studies, teenagers",15
-"Median OWE, teens",-0.17
-"Mean OWE, teens",-0.25
-"Median OWE, restaurants/retail",-0.09
-"Mean OWE, restaurants/retail",-0.17
-Number of studies Post-2010 large/medium negative,10
-Number of studies Post-2010 positive or small negative,39
-Number of studies Pre-2010 large/medium negative,11
-Number of studies Pre-2010 positive or small negative,12
-"Number of studies, 1992 - 1999",6
-"Number of studies, 2000 - 2009",17
-"Number of studies, 2010 - 2019",22
-"Number of studies, 2020 - 2024",27
-"Median OWE, 2000 - 2009",-0.45
-"Mean OWE, 2000 - 2009",-0.52
-"Median OWE, 2010 - 2019",-0.12
-"Mean OWE, 2010 - 2019",-0.29
-"Median OWE, 2020 - 2024",0.00
-"Mean OWE, 2020 - 2024",-0.15
-"Median OWE, 1992 - 1999",0.15
-"Mean OWE, 1992 - 1999",0.27
+"Number of studies, published, restaurants/retail",21
+"Number of studies, published, teenagers",15
+"Median OWE, published, teens",-0.17
+"Mean OWE, published, teens",-0.25
+"Median OWE, published, restaurants/retail",-0.09
+"Mean OWE, published, restaurants/retail",-0.17
+Number of published studies Post-2010 large/medium negative,10
+Number of published studies Post-2010 positive or small negative,39
+Number of published studies Pre-2010 large/medium negative,11
+Number of published studies Pre-2010 positive or small negative,12
+"Number of published studies, 1992 - 1999",6
+"Number of published studies, 2000 - 2009",17
+"Number of published studies, 2010 - 2019",22
+"Number of published studies, 2020 - 2024",27
+"Median OWE, published, 2000 - 2009",-0.45
+"Mean OWE, published, 2000 - 2009",-0.52
+"Median OWE, published, 2010 - 2019",-0.12
+"Mean OWE, published, 2010 - 2019",-0.29
+"Median OWE, published, 2020 - 2024",0.00
+"Mean OWE, published, 2020 - 2024",-0.15
+"Median OWE, published, 1992 - 1999",0.15
+"Mean OWE, published, 1992 - 1999",0.27
 "Null: equality of means  , 2000-2009 and 2020-2024, p-value",0.073
 "Null: equality of medians, 2000-2009 and 2020-2024, p-value",0.033
 "Null: equality of medium/large negative share, before and after 2010, p-value ",0.026

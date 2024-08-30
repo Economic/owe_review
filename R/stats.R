@@ -26,25 +26,25 @@ create_paper_stats_csv = function(data, ns_dz_data, file_name) {
     filter(published == 1, overall == 1) |> 
     summarize(value = median(owe_b)) |> 
     mutate(value = label_number(accuracy = 0.01)(value)) |> 
-    mutate(name = "Median OWE, broad group")
+    mutate(name = "Median OWE, published, broad group")
   
   median_narrow = data |> 
     filter(published == 1, overall != 1) |> 
     summarize(value = median(owe_b)) |> 
     mutate(value = label_number(accuracy = 0.01)(value)) |> 
-    mutate(name = "Median OWE, narrow group")
+    mutate(name = "Median OWE, published, narrow group")
   
   median_us = data |> 
     filter(published == 1, country == "US") |> 
     summarize(value = median(owe_b)) |> 
     mutate(value = label_number(accuracy = 0.01)(value)) |> 
-    mutate(name = "Median OWE, United States")
+    mutate(name = "Median OWE, published, United States")
   
   mean_us = data |> 
     filter(published == 1, country == "US") |> 
     summarize(value = mean(owe_b)) |> 
     mutate(value = label_number(accuracy = 0.01)(value)) |> 
-    mutate(name = "Mean OWE, United States")
+    mutate(name = "Mean OWE, published, United States")
   
   count_studies_all = data |> 
     count() |> 
@@ -62,7 +62,7 @@ create_paper_stats_csv = function(data, ns_dz_data, file_name) {
     mutate(more_positive = owe_b >= -0.4) |> 
     summarize(value = mean(more_positive)) |> 
     mutate(value = label_percent(accuracty = 1)(value)) |> 
-    mutate(name = "Share of studies with OWE >= -0.4")
+    mutate(name = "Share of published studies with OWE >= -0.4")
   
   number_journals = data |> 
     filter(published == 1) |> 
@@ -128,13 +128,13 @@ create_paper_stats_csv = function(data, ns_dz_data, file_name) {
     filter(published == 1, overall != 1) |> 
     count() |> 
     mutate(value = as.character(n)) |> 
-    mutate(name = "Number of studies, narrow groups")
+    mutate(name = "Number of published studies, narrow groups")
   
   number_studies_broad = data |> 
     filter(published == 1, overall == 1) |> 
     count() |> 
     mutate(value = as.character(n)) |> 
-    mutate(name = "Number of studies, broad groups")
+    mutate(name = "Number of published studies, broad groups")
   
   broad_owe_2020_share = data %>% 
     filter(published == 1, overall == 1) %>% 
@@ -159,8 +159,8 @@ create_paper_stats_csv = function(data, ns_dz_data, file_name) {
     summarize(value = median(owe_b), .by = overall) %>% 
     mutate(value = label_number(accuracy = 0.01)(value)) %>% 
     mutate(name = case_when(
-      overall == 1 ~ "Median OWE in year >= 2010, broad group",
-      overall != 1 ~ "Median OWE in year >= 2010, narrow group"
+      overall == 1 ~ "Median OWE in year >= 2010, published, broad group",
+      overall != 1 ~ "Median OWE in year >= 2010, published, narrow group"
     )) 
   
   number_studies_2010_broad_v_narrow = data %>% 
@@ -176,37 +176,37 @@ create_paper_stats_csv = function(data, ns_dz_data, file_name) {
     filter(published == 1, restaurants_retail == 1) |> 
     count() |> 
     mutate(value = as.character(n)) |> 
-    mutate(name = "Number of studies, restaurants/retail")
+    mutate(name = "Number of studies, published, restaurants/retail")
   
   number_studies_teen = data |> 
     filter(published == 1, teens == 1) |> 
     count() |> 
     mutate(value = as.character(n)) |> 
-    mutate(name = "Number of studies, teenagers")
+    mutate(name = "Number of studies, published, teenagers")
   
   median_teen = data |> 
     filter(published == 1, teens == 1) |> 
     summarize(value = median(owe_b)) |> 
     mutate(value = label_number(accuracy = 0.01)(value)) |> 
-    mutate(name = "Median OWE, teens")
+    mutate(name = "Median OWE, published, teens")
   
   mean_teen = data |> 
     filter(published == 1, teens == 1) |> 
     summarize(value = mean(owe_b)) |> 
     mutate(value = label_number(accuracy = 0.01)(value)) |> 
-    mutate(name = "Mean OWE, teens")
+    mutate(name = "Mean OWE, published, teens")
   
   median_rr = data |> 
     filter(published == 1, restaurants_retail == 1) |> 
     summarize(value = median(owe_b)) |> 
     mutate(value = label_number(accuracy = 0.01)(value)) |> 
-    mutate(name = "Median OWE, restaurants/retail")
+    mutate(name = "Median OWE, published, restaurants/retail")
   
   mean_rr = data |> 
     filter(published == 1, restaurants_retail == 1) |> 
     summarize(value = mean(owe_b)) |> 
     mutate(value = label_number(accuracy = 0.01)(value)) |> 
-    mutate(name = "Mean OWE, restaurants/retail")
+    mutate(name = "Mean OWE, published, restaurants/retail")
   
   negative_owe_share = data %>% 
     filter(published == 1) %>% 
@@ -230,7 +230,7 @@ create_paper_stats_csv = function(data, ns_dz_data, file_name) {
     )) %>% 
     count(period, size) %>% 
     mutate(value = as.character(n)) %>% 
-    mutate(name = paste("Number of studies", period, size))
+    mutate(name = paste("Number of published studies", period, size))
   
   decade_data = data %>% 
     mutate(decade = case_when(
@@ -244,7 +244,7 @@ create_paper_stats_csv = function(data, ns_dz_data, file_name) {
     filter(published == 1) %>% 
     count(decade) %>% 
     mutate(
-      name = paste("Number of studies,", decade),
+      name = paste("Number of published studies,", decade),
       value = as.character(n)
     )
   
@@ -257,7 +257,7 @@ create_paper_stats_csv = function(data, ns_dz_data, file_name) {
     ) %>% 
     pivot_longer(-decade) %>% 
     mutate(
-      name = paste(name, "OWE,", decade),
+      name = paste(name, "OWE, published,", decade),
       value = label_number(accuracy = 0.01)(value)
     ) 
   
