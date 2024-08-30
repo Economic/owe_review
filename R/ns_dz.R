@@ -46,15 +46,33 @@ combine_ns_dz = function(ns_data, ns_dz_matches, owe_data) {
   # Leung 2021
 }
 
- 
-# tar_read(combined_ns_dz) %>% 
-#   filter(is.na(ns_study_id), !is.na(dz_study_id)) %>% 
-#   distinct(dz_study_id, .keep_all = T) %>% 
-#   filter(dz_published == 1, dz_country == "US", dz_year <= 2021) %>%
-#   summarize(
-#     mean_ns_elast = mean(ns_elast), 
-#     median_ns_elast = median(ns_elast), 
-#     n = n(), 
-#     median_dz_owe = median(dz_owe), 
-#     mean_dz_owe = mean(dz_owe)
-#   )
+make_ns_dz_unique = function(data) {
+  ns_studies = data |> 
+    filter(!is.na(ns_study_id)) |> 
+    summarize(ns_elast = median(ns_elast), .by = ns_study_id) |> 
+    mutate(ns_pos = if_else(ns_elast >= 0, 1, 0))
+  
+  dz_studies = data |> 
+    filter(!is.na(dz_owe)) |> 
+    summarize(
+      dz_owe = first(dz_owe), 
+      ns_study_id = first(ns_study_id), 
+      dz_published = first(dz_published), 
+      dz_country = first(dz_country),
+      .by = dz_study_id
+    ) |> 
+    mutate(dz_pos = if_else(dz_owe >= 0, 1, 0))
+  
+  dz_studies |> 
+    full_join(ns_studies, by = "ns_study_id") |> 
+    mutate(dz_status = case_when(
+      dz_pos == 1 ~ "DZ positive",
+      dz_pos == 0 ~ "DZ negative",
+      .default = "DZ missing"
+    )) |> 
+    mutate(ns_status = case_when(
+      ns_pos == 1 ~ "NS positive",
+      ns_pos == 0 ~ "NS negative",
+      .default = "NS missing"
+    ))
+}

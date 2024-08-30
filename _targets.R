@@ -21,6 +21,7 @@ tar_plan(
   ns_data = read_ns_data(ns_data_xls),
   ns_dz_matches = read_csv(ns_dz_matches_csv, show_col_types = FALSE),
   combined_ns_dz = combine_ns_dz(ns_data, ns_dz_matches, owe_data),
+  unique_ns_dz = make_ns_dz_unique(combined_ns_dz),
   
   # bootstrapped median and mean by decade
   boot_central = bootstrap_by_decade(owe_data),
@@ -69,6 +70,18 @@ tar_plan(
     make_summary_table(owe_data, "docs/summary_table.tex")
   ),
   
+  # country table
+  tar_file(
+    country_table, 
+    make_country_table(owe_data, "docs/country_table.tex")
+  ),
+  
+  # DZ NS table
+  tar_file(
+    dz_ns_table, 
+    make_dz_ns_table(unique_ns_dz, "docs/dz_ns_table.tex")
+  ),
+  
   # list of references
   tar_file(
     reference_list, 
@@ -98,14 +111,15 @@ tar_plan(
   
   # hypothetical elasticities table
   tar_file(
-    hypohetical_elasticities_table, 
+    hypothetical_elasticities_table, 
     make_hypothetical_table("docs/hypothetical_table.tex")
   ),
   
+  # misc stats for review text
   tar_file(
     paper_stats_csv, create_paper_stats_csv(
       owe_data,
-      ns_dz_matches,
+      unique_ns_dz,
       "docs/paper_stats.csv"
     )
   )

@@ -1,8 +1,3 @@
-grab_owe_data <- function(csv, download_date) {
-  read_csv(csv, show_col_types = FALSE) %>% 
-    mutate(download_date = download_date) 
-}
-
 summary_df_row <- function(data, filter_string, weighted = FALSE) {
   filtered_data <- data %>% 
     filter(eval(rlang::parse_expr(filter_string))) 

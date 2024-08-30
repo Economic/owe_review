@@ -60,5 +60,12 @@ Number of studies Pre-2010 positive or small negative,12
 "Null: equality of medium/large negative share, before and after 2010, p-value ",0.026
 Share of published studies with negative OWE,60%
 Share of published US studies in 2021 or before with negative OWE,61%
+"NS studies, total number",69
+"NS studies, number positive",19
+"NS studies, share positive",28%
+"DZ studies US published, total number",56
+"DZ studies US published, number positive",23
+"DZ studies US published, share positive",41%
+"DZ NS superset, number of studies",89
 "Number of studies, NS DZ intersection",36
 "Median OWE, NS DZ intersection",-0.20
