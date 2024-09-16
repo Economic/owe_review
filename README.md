@@ -1,6 +1,6 @@
 # Replication package for Dube and Zipperer (2024) "Own-Wage Elasticity: Quantifying the Impact of Minimum Wages on Employment"
 
-This is the replication package that produces the tables, figures, statistics, and appendix source list in [Dube and Zipperer (2024)](https::/someurl.somewhere) "Own-Wage Elasticity: Quantifying the Impact of Minimum Wages on Employment".
+This is the replication package that produces the tables, figures, statistics, and appendix source list in [Dube and Zipperer (2024)](https://www.nber.org/papers/w32925) "Own-Wage Elasticity: Quantifying the Impact of Minimum Wages on Employment".
 
 ## Contents
 
