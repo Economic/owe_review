@@ -427,6 +427,14 @@ create_paper_stats_csv = function(data, ns_dz_data, file_name) {
     mutate(value = label_number(accuracy = 0.01)(value)) %>%
     mutate(name = "Median OWE, NS DZ intersection")
 
+  count_studies_no_se = data |>
+    filter(is.na(owe_se)) |>
+    count(published) |>
+    mutate(name = if_else(published == 1, "published", "not published")) |>
+    mutate(name = paste("Count of studies with no SE,", name)) |>
+    mutate(value = as.character(n)) |>
+    select(name, value)
+
   results = bind_rows(
     owe_data_version,
     count_studies_all,
@@ -478,7 +486,8 @@ create_paper_stats_csv = function(data, ns_dz_data, file_name) {
     ns_positive_share_with_extra_studies,
     number_studies_ns_dz_overlap,
     share_studies_ns_dz_overlap_positive,
-    median_owe_ns_dz_overlap
+    median_owe_ns_dz_overlap,
+    count_studies_no_se
   ) |>
     select(name, value)
 
