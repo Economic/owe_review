@@ -8,8 +8,12 @@ tar_source()
 tar_option_set(seed = 2533725)
 
 tar_assign({
-  # owe data from web
+  # owe data from web, downloaded current version
   owe_data = "mw_owe_repository.csv" |>
+    tar_file_read(read_csv(!!.x, show_col_types = FALSE))
+
+  # owe data from web, downloaded archived version, used for training
+  archived_owe_data = "mw_owe_repository_2025_9_1.csv" |>
     tar_file_read(read_csv(!!.x, show_col_types = FALSE))
 
   # ns data
@@ -36,6 +40,17 @@ tar_assign({
   histogram_inputs = define_histograms() |>
     tar_target()
   all_histograms = make_histograms(owe_data, histogram_inputs) |>
+    tar_target()
+
+  # STUDY SELECTION TRAINING
+  # journal list
+  initial_journals = "initial_journals.csv" |>
+    tar_file_read(read_csv(!!.x, show_col_types = FALSE))
+
+  initial_issns = create_initial_issns(initial_journals) |>
+    tar_target()
+
+  early_works = retrieve_early_works(initial_issns) |>
     tar_target()
 
   # MAIN TEXT FIGURES
