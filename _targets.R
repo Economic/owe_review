@@ -50,8 +50,29 @@ tar_assign({
   initial_issns = create_initial_issns(initial_journals) |>
     tar_target()
 
-  early_works = retrieve_early_works(initial_issns) |>
+  # two batches of early works in order to avoid API limits
+  early_works = retrieve_early_works(
+    initial_issns,
+    from = "2010-01-01",
+    to = "2018-12-31"
+  ) |>
     tar_target()
+
+  late_works = retrieve_works_oa(
+    initial_issns,
+    from = "2019-01-01",
+    to = "2025-09-30"
+  ) |>
+    tar_target()
+
+  early_works_csv = make_works_csv(
+    early_works,
+    "openalex_early_works.csv"
+  ) |>
+    tar_file_read(read_csv(!!.x, show_col_types = FALSE))
+
+  late_works_csv = make_works_csv(late_works, "openalex_late_works.csv") |>
+    tar_file_read(read_csv(!!.x, show_col_types = FALSE))
 
   # MAIN TEXT FIGURES
   # range plot of all studies
